@@ -1,0 +1,8 @@
+{
+  "name": "NeuroCloud AI",
+  "description": "Autonomous Zero-Water Compute & Edge-Memory Orchestrator with real-time thermal telemetry, local AES-256-GCM memory, and ISO-14046 ESG compliance proofing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@layer base {
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #020617;
+    color: #e2e8f0;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  body {
+    background:
+      radial-gradient(1100px 600px at 5% -10%, rgba(34, 211, 238, 0.12), transparent 65%),
+      radial-gradient(950px 550px at 95% 105%, rgba(16, 185, 129, 0.12), transparent 65%),
+      radial-gradient(800px 400px at 50% 50%, rgba(15, 23, 42, 0.7), transparent 80%),
+      #020617;
+  }
+}
+
+.glass-panel {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.glass-card {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.pulse-dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background: #34d399;
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+  animation: pulse-emerald 2s infinite;
+}
+
+.pulse-dot.cyan {
+  background: #22d3ee;
+  box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.6);
+  animation: pulse-cyan 2s infinite;
+}
+
+.pulse-dot.off {
+  background: #64748b;
+  animation: none;
+  box-shadow: none;
+}
+
+@keyframes pulse-emerald {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+  70% { box-shadow: 0 0 0 0.5rem rgba(52, 211, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+
+@keyframes pulse-cyan {
+  0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7); }
+  70% { box-shadow: 0 0 0 0.5rem rgba(34, 211, 238, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+}
+
+.scroll-smooth-dark {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(51, 65, 85, 0.6) transparent;
+}
+
+.scroll-smooth-dark::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scroll-smooth-dark::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-smooth-dark::-webkit-scrollbar-thumb {
+  background: linear-gradient(rgba(34, 211, 238, 0.35), rgba(52, 211, 153, 0.35));
+  border-radius: 9999px;
+}
+
+.scroll-smooth-dark::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(rgba(34, 211, 238, 0.7), rgba(52, 211, 153, 0.7));
+}
+
+@keyframes blink-dot {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.1); }
+}
+
+.typing-dot {
+  display: inline-block;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 9999px;
+  background-color: #22d3ee;
+  animation: blink-dot 1.2s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }

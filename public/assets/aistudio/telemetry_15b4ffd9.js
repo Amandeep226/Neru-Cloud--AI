@@ -1,0 +1,116 @@
+/* Telemetry: KPI cards, node load bars, routing audit log and the exportable ESG certificate. */
+(function () {
+  const KEY = 'neurocloud.v1.telemetry';
+  const WUE_EVAP = 1.8;
+  const fresh = () => ({
+    session: 'NC-' + Math.random().toString(16).slice(2, 10).toUpperCase(), started: new Date().toISOString(),
+    requests: 0, writes: 0, water: 0, energy: 0, dtLast: 0, dtMax: 0, dtSum: 0, bypassed: 0,
+    loads: { photonic: 18, immersion: 24 }, logs: []
+  });
+  let S = fresh();
+  try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(fresh(), JSON.parse(raw)); } catch (e) { S = fresh(); }
+
+  // cyrb53 hash: compact, deterministic fingerprint for the certificate (not a security feature)
+  function hash(str, seed) {
+    let h1 = 0xdeadbeef ^ (seed || 0), h2 = 0x41c6ce57 ^ (seed || 0);
+    for (let i = 0; i < str.length; i++) { const c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');
+  }
+  const stamp = () => new Date().toLocaleTimeString([], { hour12: false });
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* storage blocked */ } };
+  const $ = (id) => document.getElementById(id);
+
+  function addLog(line) {
+    S.logs.push('[' + stamp() + '] ' + line);
+    if (S.logs.length > 60) S.logs.shift();
+  }
+
+  function apply(t, extraLog) {
+    S.requests += 1;
+    S.water += t.water_saved_l; S.energy += t.energy_kwh;
+    S.dtLast = t.delta_t_c; S.dtMax = Math.max(S.dtMax, t.delta_t_c); S.dtSum += t.delta_t_c;
+    S.bypassed += t.db_bytes_bypassed;
+    for (const id of Object.keys(S.loads)) {
+      S.loads[id] = id === t.node ? Math.min(96, S.loads[id] + 8 + t.tokens / 40) : Math.max(12, S.loads[id] - 4);
+    }
+    (t.route || []).forEach(addLog);
+    if (extraLog) addLog(extraLog);
+    save(); render();
+  }
+
+  function certData() {
+    const avg = S.requests ? S.dtSum / S.requests : 0;
+    const body = [S.session, S.requests, S.water.toFixed(6), S.dtMax.toFixed(2), S.bypassed].join('|');
+    return { id: 'NC-' + hash(body).slice(0, 12).toUpperCase(), fingerprint: hash(body, 7) + hash(body, 13), avg, body };
+  }
+
+  function render() {
+    const c = certData();
+    const set = (id, t) => { const el = $(id); if (el) el.textContent = t; };
+    set('kpi-writes', String(S.writes));
+    set('kpi-water', S.water.toFixed(4));
+    set('kpi-dt', '+' + S.dtLast.toFixed(2) + ' °C');
+    set('cert-id', S.requests ? c.id : '-');
+    set('cert-req', String(S.requests));
+    set('cert-water', S.water.toFixed(4) + ' L');
+    set('cert-dt', c.avg.toFixed(2) + ' / ' + S.dtMax.toFixed(2) + ' °C');
+    set('cert-bypass', window.EdgeMemory ? EdgeMemory.fmt(S.bypassed) : S.bypassed + ' B');
+    document.querySelectorAll('[data-node]').forEach((el) => {
+      const v = Math.round(S.loads[el.dataset.node] || 0);
+      el.querySelector('.pct').textContent = v + '%';
+      el.querySelector('.bar-fill').style.width = v + '%';
+    });
+    const log = $('route-log');
+    if (log) {
+      log.textContent = '';
+      S.logs.forEach((l) => { const d = document.createElement('div'); d.textContent = l; log.appendChild(d); });
+      log.scrollTop = log.scrollHeight;
+    }
+  }
+
+  function reset() { S = fresh(); save(); render(); }
+
+  function exportCertificate() {
+    const c = certData();
+    const lines = [
+      'NEUROCLOUD AI - ISO 14046 ESG COMPLIANCE CERTIFICATE (PROTOTYPE RECORD)',
+      '======================================================================',
+      'Certificate ID : ' + c.id,
+      'Session ID     : ' + S.session,
+      'Session start  : ' + S.started,
+      'Issued         : ' + new Date().toISOString(),
+      '',
+      'METRICS',
+      '  Requests covered              : ' + S.requests,
+      '  Cloud DB writes               : ' + S.writes,
+      '  Chat data kept off cloud DBs  : ' + S.bypassed + ' bytes',
+      '  Modelled energy               : ' + S.energy.toFixed(6) + ' kWh',
+      '  Freshwater saved              : ' + S.water.toFixed(6) + ' L',
+      '  Thermal delta (avg / max)     : +' + c.avg.toFixed(2) + ' / +' + S.dtMax.toFixed(2) + ' C',
+      '  Routed WUE                    : 0.00 L/kWh (dry-cooled / closed-loop nodes)',
+      '',
+      'METHOD',
+      '  Freshwater saved = modelled energy x ' + WUE_EVAP + ' L/kWh (assumed evaporative-cooling baseline).',
+      '  Energy and thermal delta are heuristic estimates derived from request size.',
+      '  Chat history is stored in the user\'s browser (localStorage); this app writes none to a cloud database.',
+      '',
+      'Integrity fingerprint: ' + c.fingerprint,
+      '',
+      'NOTICE: Self-generated by a prototype from simulated data. This is not an accredited or',
+      'third-party-verified ISO 14046 water-footprint assessment.',
+      '',
+      'ROUTING AUDIT (last ' + Math.min(S.logs.length, 20) + ' entries)'
+    ].concat(S.logs.slice(-20));
+    const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'NeuroCloud-ISO14046-ESG-Certificate-' + c.id + '.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    addLog('ESG certificate ' + c.id + ' exported'); save(); render();
+  }
+
+  window.Telemetry = { apply, addLog, render, reset, exportCertificate, hash, WUE_EVAP, state: () => S };
+})();

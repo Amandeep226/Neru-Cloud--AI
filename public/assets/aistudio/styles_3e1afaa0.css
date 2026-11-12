@@ -1,0 +1,29 @@
+html, body { height: 100%; }
+body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:
+  radial-gradient(900px 500px at 10% -10%, rgba(34,211,238,.10), transparent 60%),
+  radial-gradient(800px 500px at 100% 110%, rgba(16,185,129,.10), transparent 60%), #020617; }
+.glass { background: rgba(15,23,42,.62); border: 1px solid rgba(148,163,184,.16);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-radius: 1rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,.35); }
+.pulse-dot { display:inline-block; width:.6rem; height:.6rem; border-radius:9999px; background:#34d399;
+  box-shadow:0 0 0 0 rgba(52,211,153,.6); animation: pulse 1.8s infinite; }
+.pulse-dot.cyan { background:#22d3ee; box-shadow:0 0 0 0 rgba(34,211,238,.6); animation-name: pulseCyan; }
+.pulse-dot.off { background:#64748b; animation:none; box-shadow:none; }
+@keyframes pulse { 70% { box-shadow:0 0 0 .55rem rgba(52,211,153,0);} 100% { box-shadow:0 0 0 0 rgba(52,211,153,0);} }
+@keyframes pulseCyan { 70% { box-shadow:0 0 0 .55rem rgba(34,211,238,0);} 100% { box-shadow:0 0 0 0 rgba(34,211,238,0);} }
+.scroll { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+.scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.scroll::-webkit-scrollbar-track { background: transparent; }
+.scroll::-webkit-scrollbar-thumb { background: linear-gradient(#22d3ee55,#34d39955); border-radius: 9999px; }
+.scroll::-webkit-scrollbar-thumb:hover { background: linear-gradient(#22d3ee99,#34d39999); }
+.msg { max-width: 85%; padding:.7rem .9rem; border-radius:.9rem; font-size:.9rem; line-height:1.45; white-space:pre-wrap; word-break:break-word; }
+.msg.user { align-self:flex-end; background:rgba(8,145,178,.28); border:1px solid rgba(34,211,238,.35); }
+.msg.ai { align-self:flex-start; background:rgba(30,41,59,.75); border:1px solid rgba(148,163,184,.18); }
+.msg.sys { align-self:center; max-width:95%; background:rgba(5,150,105,.14); border:1px solid rgba(52,211,153,.3); font-size:.8rem; color:#a7f3d0; }
+.msg small { display:block; margin-top:.35rem; font-size:.68rem; color:#94a3b8; }
+.bar-fill { transition: width .6s ease; }
+.typing span { display:inline-block; width:.35rem; height:.35rem; margin-right:.2rem; border-radius:9999px; background:#22d3ee; animation: blink 1s infinite; }
+.typing span:nth-child(2){ animation-delay:.15s } .typing span:nth-child(3){ animation-delay:.3s }
+@keyframes blink { 0%,80%,100% { opacity:.2 } 40% { opacity:1 } }
+button:focus-visible, input:focus-visible, select:focus-visible { outline:2px solid #22d3ee; outline-offset:2px; }
+@media (prefers-reduced-motion: reduce) { .pulse-dot, .typing span, .bar-fill { animation:none; transition:none; } }
